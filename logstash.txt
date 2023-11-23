@@ -1,0 +1,27 @@
+#Logstash Pipeline: 
+
+## vim /etc/logstash/conf.d/logstash.conf
+
+input {
+  stdin {}
+  file {
+    path => "/var/log/nginx/access.log"
+    start_position => "beginning"
+    sincedb_path => "/usr/share/logstash/sincedb-access"
+    type => "logs"
+    codec => multiline {
+      pattern => "^\[%{TIMESTAMP_ISO8601}\] "
+      negate => true
+      what => "previous"
+      auto_flush_interval => 10
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["192.168.0.110:9200"]
+    index => "nginx-log-%{+YYYY.MM.dd}"
+  }
+}
+
